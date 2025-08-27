@@ -1,0 +1,10 @@
+# os 
+.DS_STORE
+
+# zig
+.zig-cache
+zig-out
+lib*.a
+
+# 
+.vscode

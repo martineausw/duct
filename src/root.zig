@@ -434,6 +434,15 @@ pub fn arangeInPlace(
     }
 }
 
+pub fn initFill(allocator: Allocator, comptime T: type, n: usize, value: T) ziggurat.sign(.any(&.{
+    .is_int(.{}),
+    .is_float(.{}),
+}))(T)(Allocator.Error![]T) {
+    const result = try allocator.alloc(T, n);
+    fillInPlace(result, value);
+    return result;
+}
+
 pub fn initZeroes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),

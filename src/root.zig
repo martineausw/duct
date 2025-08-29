@@ -391,7 +391,7 @@ pub fn transposeInPlace(
     has_known_len,
     .not(.is_array(.{})),
     .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+}))(@TypeOf(data))(Allocator.Error!void) {
     if (len(data) != axes.len) return error.MismatchedLengths;
 
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));

@@ -420,6 +420,49 @@ pub fn copyToSlice(
     return result;
 }
 
+pub fn arangeInPlace(
+    data: anytype,
+    start: meta.Elem(@TypeOf(data)),
+    step: meta.Elem(@TypeOf(data)),
+) ziggurat.sign(.all(&.{
+    has_known_len,
+    .not(.is_array(.{})),
+    .not(.is_vector(.{})),
+}))(@TypeOf(data))(void) {
+    const value: usize = start;
+    for (0..len(data)) |index| {
+        set(data, index, value);
+        value += step;
+    }
+}
+
+pub fn initZeroes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(.any(&.{
+    .is_int(.{}),
+    .is_float(.{}),
+}))(T)(Allocator.Error!void) {
+    const result = try allocator.alloc(T, n);
+    zeroesInPlace(result);
+    return result;
+}
+
+pub fn initOnes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(.any(&.{
+    .is_int(.{}),
+    .is_float(.{}),
+}))(T)(Allocator.Error!void) {
+    const result = try allocator.alloc(T, n);
+    onesInPlace(result);
+    return result;
+}
+
+pub fn initARange(allocator: Allocator, comptime T: type, n: usize, start: T, step: T) ziggurat.sign(.any(&.{
+    .is_int(.{}),
+    .is_float(.{}),
+}))(T)(Allocator.Error!void) {
+    const result = try allocator.alloc(T, n);
+    arangeInPlace(result, start, step);
+    return result;
+}
+
 test "at" {
     const slice: []const usize = &.{ 1, 2, 3 };
 

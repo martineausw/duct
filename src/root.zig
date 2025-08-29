@@ -222,7 +222,7 @@ pub fn lastIndexOf(
     return null;
 }
 
-pub fn map(
+pub fn mapToSlice(
     allocator: Allocator,
     data: anytype,
     func: *const fn (
@@ -244,7 +244,7 @@ pub fn map(
     return result;
 }
 
-pub fn filter(
+pub fn filterToSlice(
     allocator: Allocator,
     data: anytype,
     func: *const fn (
@@ -381,6 +381,43 @@ pub fn zeroesInPlace(
     .not(.is_vector(.{})),
 }))(@TypeOf(data))(void) {
     fillInPlace(data, 0);
+}
+
+pub fn transposeInPlace(
+    allocator: Allocator,
+    data: anytype,
+    axes: []const usize,
+) ziggurat.sign(.any(&.{
+    has_known_len,
+    .not(.is_array(.{})),
+    .not(.is_vector(.{})),
+}))(@TypeOf(data))(void) {
+    if (len(data) != axes.len) return error.MismatchedLengths;
+
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
+
+    for (0..len) |index| {
+        result[index] = at(data, axes[index]);
+    }
+
+    for (0..data) |index| {
+        set(data, index, result[index]);
+    }
+
+    allocator.free(result);
+}
+
+pub fn copyToSlice(
+    allocator: Allocator,
+    data: anytype,
+) ziggurat.sign(has_known_len)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
+
+    for (0..result.len) |index| {
+        result = at(data, index);
+    }
+
+    return result;
 }
 
 test "at" {
@@ -805,11 +842,11 @@ test "map" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const array_doubled = try map(testing.allocator, array, array_func.call);
+    const array_doubled = try mapToSlice(testing.allocator, array, array_func.call);
     defer testing.allocator.free(array_doubled);
-    const vector_doubled = try map(testing.allocator, vector, vector_func.call);
+    const vector_doubled = try mapToSlice(testing.allocator, vector, vector_func.call);
     defer testing.allocator.free(vector_doubled);
-    const slice_doubled = try map(testing.allocator, slice, slice_func.call);
+    const slice_doubled = try mapToSlice(testing.allocator, slice, slice_func.call);
     defer testing.allocator.free(slice_doubled);
 
     try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, array_doubled);
@@ -895,11 +932,11 @@ test "filter" {
     slice[4] = 5;
     slice[5] = 6;
 
-    const array_doubled = try filter(testing.allocator, array, array_func.call);
+    const array_doubled = try filterToSlice(testing.allocator, array, array_func.call);
     defer testing.allocator.free(array_doubled);
-    const vector_doubled = try filter(testing.allocator, vector, vector_func.call);
+    const vector_doubled = try filterToSlice(testing.allocator, vector, vector_func.call);
     defer testing.allocator.free(vector_doubled);
-    const slice_doubled = try filter(testing.allocator, slice, slice_func.call);
+    const slice_doubled = try filterToSlice(testing.allocator, slice, slice_func.call);
     defer testing.allocator.free(slice_doubled);
 
     try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, array_doubled);

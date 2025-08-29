@@ -394,11 +394,11 @@ pub fn transposeInPlace(
 }))(@TypeOf(data))(Allocator.Error!void) {
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
 
-    for (0..len) |index| {
+    for (0..len(data)) |index| {
         result[index] = at(data, axes[index]);
     }
 
-    for (0..data) |index| {
+    for (0..len(data)) |index| {
         set(data, index, result[index]);
     }
 

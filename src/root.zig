@@ -392,8 +392,6 @@ pub fn transposeInPlace(
     .not(.is_array(.{})),
     .not(.is_vector(.{})),
 }))(@TypeOf(data))(Allocator.Error!void) {
-    if (len(data) != axes.len) return error.MismatchedLengths;
-
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
 
     for (0..len) |index| {
@@ -414,7 +412,7 @@ pub fn copyToSlice(
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
 
     for (0..result.len) |index| {
-        result = at(data, index);
+        result[index] = at(data, index);
     }
 
     return result;

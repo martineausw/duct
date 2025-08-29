@@ -33,8 +33,8 @@
     // internet connectivity.
     .dependencies = .{
         .ziggurat = .{
-            .url = "git+https://github.com/martineausw/ziggurat.git?ref=HEAD#761c23dec52f8e0430ba65b1256c13686e632d61",
-            .hash = "ziggurat-0.0.0-rsRs6YS4AQCAaTX4kJNHQsSz9LAJf4_oPvgRZ0iYbWS_",
+            .url = "git+https://github.com/martineausw/ziggurat.git?ref=HEAD#80adbfc808368f0949e48d8adeba48500a4f10dc",
+            .hash = "ziggurat-0.0.0-rsRs6V24AQBJjrWuET8ga7PkUe17BrN-DCXQ9_UU979K",
         },
     },
     .paths = .{

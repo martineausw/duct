@@ -4,9 +4,10 @@ const meta = std.meta;
 
 const ziggurat = @import("ziggurat");
 
-const get = @import("get.zig");
+const element_get = @import("get.zig");
 const prototype = @import("prototype.zig");
 
+pub const get = @import("iterate/get.zig");
 pub const set = @import("iterate/set.zig");
 pub const new = @import("iterate/new.zig");
 
@@ -18,9 +19,9 @@ pub fn forEach(
         array: @TypeOf(data),
     ) void,
 ) ziggurat.sign(prototype.has_len)(@TypeOf(data))(void) {
-    for (0..get.len(data)) |index| {
+    for (0..element_get.len(data)) |index| {
         func(
-            get.at(data, index),
+            element_get.at(data, index),
             index,
             data,
         );
@@ -36,9 +37,9 @@ pub fn every(
     ) bool,
 ) ziggurat.sign(prototype.has_len)(@TypeOf(data))(bool) {
     var result: bool = true;
-    for (0..get.len(data)) |index| {
+    for (0..element_get.len(data)) |index| {
         result = result and func(
-            get.at(data, index),
+            element_get.at(data, index),
             index,
             data,
         );
@@ -54,9 +55,9 @@ pub fn some(
         data: @TypeOf(data),
     ) bool,
 ) ziggurat.sign(prototype.has_len)(@TypeOf(data))(bool) {
-    for (0..get.len(data)) |index| {
+    for (0..element_get.len(data)) |index| {
         if (func(
-            get.at(data, index),
+            element_get.at(data, index),
             index,
             data,
         )) return true;

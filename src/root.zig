@@ -461,13 +461,97 @@ pub fn initOnes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(
     return result;
 }
 
-pub fn initARange(allocator: Allocator, comptime T: type, n: usize, start: T, step: T) ziggurat.sign(.any(&.{
+pub fn initARange(allocator: Allocator, comptime T: type, n: usize, start: T, step: T) ziggurat.sign(.seq.any(&.{
     .is_int(.{}),
     .is_float(.{}),
 }))(T)(Allocator.Error![]T) {
     const result = try allocator.alloc(T, n);
     arangeInPlace(result, start, step);
     return result;
+}
+
+pub fn remove(
+    allocator: Allocator,
+    data: anytype,
+    index: usize,
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data) - 1);
+
+    var result_index: usize = 0;
+    for (0..len(data)) |i| {
+        if (i == index) {
+            continue;
+        }
+
+        result[result_index] = at(data, i);
+        result_index += 1;
+    }
+
+    return result;
+}
+
+pub fn insert(
+    allocator: Allocator,
+    data: anytype,
+    index: usize,
+    value: meta.Elem(@TypeOf(data)),
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data) + 1);
+
+    var data_index: usize = 0;
+    for (0..len(data) + 1) |i| {
+        if (i == index) {
+            result[i] = value;
+            continue;
+        }
+
+        result[i] = at(data, data_index);
+        data_index += 1;
+    }
+
+    return result;
+}
+
+pub fn push(
+    allocator: Allocator,
+    data: anytype,
+    value: meta.Elem(@TypeOf(data)),
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    return insert(allocator, data, len(data), value);
+}
+
+pub fn unshift(
+    allocator: Allocator,
+    data: anytype,
+    value: meta.Elem(@TypeOf(data)),
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    return insert(allocator, data, 0, value);
+}
+
+pub fn pop(
+    allocator: Allocator,
+    data: anytype,
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    return remove(allocator, data, len(data) - 1);
+}
+
+pub fn shift(
+    allocator: Allocator,
+    data: anytype,
+) ziggurat.sign(
+    has_known_len,
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    return remove(allocator, data, 0);
 }
 
 test "at" {
@@ -1076,4 +1160,85 @@ test "reduceRight" {
     try testing.expectEqual(0, array_sum);
     try testing.expectEqual(0, vector_sum);
     try testing.expectEqual(0, slice_sum);
+}
+
+test "insert" {
+    const slice: []usize = try testing.allocator.alloc(usize, 2);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 3;
+
+    const slice_inserted: []usize = try insert(testing.allocator, slice, 1, 2);
+    defer testing.allocator.free(slice_inserted);
+
+    try testing.expectEqualSlices(usize, &.{ 1, 2, 3 }, slice_inserted);
+}
+
+test "push" {
+    const slice: []usize = try testing.allocator.alloc(usize, 2);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 2;
+
+    const slice_inserted: []usize = try push(testing.allocator, slice, 3);
+    defer testing.allocator.free(slice_inserted);
+
+    try testing.expectEqualSlices(usize, &.{ 1, 2, 3 }, slice_inserted);
+}
+
+test "unshift" {
+    const slice: []usize = try testing.allocator.alloc(usize, 2);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 2;
+    slice[1] = 3;
+
+    const slice_inserted: []usize = try unshift(testing.allocator, slice, 1);
+    defer testing.allocator.free(slice_inserted);
+
+    try testing.expectEqualSlices(usize, &.{ 1, 2, 3 }, slice_inserted);
+}
+
+test "remove" {
+    const slice: []usize = try testing.allocator.alloc(usize, 3);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 2;
+    slice[2] = 3;
+
+    const slice_removed: []usize = try remove(testing.allocator, slice, 1);
+    defer testing.allocator.free(slice_removed);
+
+    try testing.expectEqualSlices(usize, &.{ 1, 3 }, slice_removed);
+}
+
+test "pop" {
+    const slice: []usize = try testing.allocator.alloc(usize, 3);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 2;
+    slice[2] = 3;
+
+    const slice_removed: []usize = try pop(testing.allocator, slice);
+    defer testing.allocator.free(slice_removed);
+
+    try testing.expectEqualSlices(usize, &.{ 1, 2 }, slice_removed);
+}
+
+test "shift" {
+    const slice: []usize = try testing.allocator.alloc(usize, 3);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 2;
+    slice[2] = 3;
+
+    const slice_removed: []usize = try shift(testing.allocator, slice);
+    defer testing.allocator.free(slice_removed);
+
+    try testing.expectEqualSlices(usize, &.{ 2, 3 }, slice_removed);
 }

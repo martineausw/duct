@@ -427,7 +427,7 @@ pub fn arangeInPlace(
     .not(.is_array(.{})),
     .not(.is_vector(.{})),
 }))(@TypeOf(data))(void) {
-    const value: usize = start;
+    var value: usize = start;
     for (0..len(data)) |index| {
         set(data, index, value);
         value += step;

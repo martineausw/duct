@@ -16,6 +16,7 @@ pub fn build(b: *std.Build) void {
 
     const mod_tests = b.addTest(.{
         .root_module = mod,
+        .name = "duct tests",
     });
 
     const ziggurat_tests = b.addTest(.{

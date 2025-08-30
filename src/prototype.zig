@@ -25,6 +25,9 @@ pub const has_len: ziggurat.Prototype = .any(&.{
     .is_pointer(.{ .size = .{ .slice = true } }),
     .is_pointer(.{ .size = .{
         .many = true,
-        .c = true,
     }, .sentinel = true }),
+});
+
+pub const is_slice: ziggurat.Prototype = .any(&.{
+    .is_pointer(.{ .size = .{ .slice = true } }),
 });

@@ -185,3 +185,7 @@ test "forEach" {
     try testing.expectEqualDeep([3]usize{ 1, 2, 3 }, vector_func.captured);
     try testing.expectEqualDeep([3]usize{ 1, 2, 3 }, slice_func.captured);
 }
+
+test {
+    testing.refAllDecls(@This());
+}

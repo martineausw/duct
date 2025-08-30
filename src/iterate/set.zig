@@ -22,12 +22,56 @@ pub fn map(
     .not(.is_pointer(.{})),
 }))(@TypeOf(data))(void) {
     for (0..get.len(data)) |index| {
-        set(
+        set.set(
             data,
             index,
             func(get.at(data, index), index, data),
         );
     }
+}
+
+pub fn filter(
+    allocator: Allocator,
+    data: anytype,
+    func: *const fn (
+        element: meta.Elem(@TypeOf(data.*)),
+        index: usize,
+        data: (@TypeOf(data.*)),
+    ) bool,
+) ziggurat.sign(.is_pointer(.{
+    .child = prototype.is_slice,
+    .is_const = false,
+    .size = .{ .one = true },
+}))(@TypeOf(data))(Allocator.Error!void) {
+    const curr_len = get.len(data.*);
+
+    var new_len: usize = 0;
+    for (0..curr_len) |index| {
+        if (func(
+            get.at(data.*, index),
+            index,
+            data.*,
+        )) {
+            new_len += 1;
+        }
+    }
+
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data.*)), new_len);
+
+    var result_index: usize = 0;
+    for (0..curr_len) |index| {
+        if (func(
+            get.at(data.*, index),
+            index,
+            data.*,
+        )) {
+            result[result_index] = get.at(data.*, index);
+            result_index += 1;
+        }
+    }
+
+    allocator.free(data.*);
+    data.* = result;
 }
 
 test "map" {
@@ -69,5 +113,27 @@ test "map" {
 
     try testing.expectEqualDeep([_]usize{ 2, 4, 6 }, array.*);
     try testing.expectEqualDeep(@Vector(3, usize){ 2, 4, 6 }, vector.*);
+    try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, slice);
+}
+
+test "filter" {
+    const slice_func = struct {
+        pub fn call(element: usize, _: usize, _: []usize) bool {
+            return element % 2 == 0;
+        }
+    };
+
+    var slice: []usize = try testing.allocator.alloc(usize, 6);
+    defer testing.allocator.free(slice);
+
+    slice[0] = 1;
+    slice[1] = 2;
+    slice[2] = 3;
+    slice[3] = 4;
+    slice[4] = 5;
+    slice[5] = 6;
+
+    try filter(testing.allocator, &slice, slice_func.call);
+
     try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, slice);
 }

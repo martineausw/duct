@@ -244,6 +244,29 @@ pub fn mapToSlice(
     return result;
 }
 
+pub fn mapRightToSlice(
+    allocator: Allocator,
+    data: anytype,
+    func: *const fn (
+        element: meta.Elem(@TypeOf(data)),
+        index: usize,
+        data: @TypeOf(data),
+    ) meta.Elem(@TypeOf(data)),
+) ziggurat.sign(has_known_len)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
+
+    for (1..len(data)) |i| {
+        const index = len(data) - i;
+        result[index] = func(
+            at(data, index),
+            index,
+            data,
+        );
+    }
+
+    return result;
+}
+
 pub fn filterToSlice(
     allocator: Allocator,
     data: anytype,

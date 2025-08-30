@@ -434,7 +434,12 @@ pub fn arangeInPlace(
     }
 }
 
-pub fn initFill(allocator: Allocator, comptime T: type, n: usize, value: T) ziggurat.sign(.any(&.{
+pub fn initFill(
+    allocator: Allocator,
+    comptime T: type,
+    n: usize,
+    value: T,
+) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
 }))(T)(Allocator.Error![]T) {
@@ -443,7 +448,11 @@ pub fn initFill(allocator: Allocator, comptime T: type, n: usize, value: T) zigg
     return result;
 }
 
-pub fn initZeroes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(.any(&.{
+pub fn initZeroes(
+    allocator: Allocator,
+    comptime T: type,
+    n: usize,
+) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
 }))(T)(Allocator.Error![]T) {
@@ -452,7 +461,11 @@ pub fn initZeroes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sig
     return result;
 }
 
-pub fn initOnes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(.any(&.{
+pub fn initOnes(
+    allocator: Allocator,
+    comptime T: type,
+    n: usize,
+) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
 }))(T)(Allocator.Error![]T) {
@@ -461,10 +474,15 @@ pub fn initOnes(allocator: Allocator, comptime T: type, n: usize) ziggurat.sign(
     return result;
 }
 
-pub fn initARange(allocator: Allocator, comptime T: type, n: usize, start: T, step: T) ziggurat.sign(.seq.any(&.{
-    .is_int(.{}),
-    .is_float(.{}),
-}))(T)(Allocator.Error![]T) {
+pub fn initARange(
+    allocator: Allocator,
+    comptime T: type,
+    n: usize,
+    start: T,
+    step: T,
+) ziggurat.sign(
+    .any(&.{ .is_float(.{}), .is_int(.{}) }),
+)(T)(Allocator.Error![]T) {
     const result = try allocator.alloc(T, n);
     arangeInPlace(result, start, step);
     return result;

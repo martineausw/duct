@@ -255,7 +255,7 @@ pub fn mapRightToSlice(
 ) ziggurat.sign(has_known_len)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), len(data));
 
-    for (1..len(data)) |i| {
+    for (1..len(data) + 1) |i| {
         const index = len(data) - i;
         result[index] = func(
             at(data, index),

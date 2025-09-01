@@ -84,7 +84,7 @@ pub fn arange(
     .not(.is_array(.{})),
     .not(.is_vector(.{})),
 }))(@TypeOf(data))(void) {
-    var value: usize = start;
+    var value: meta.Elem(@TypeOf(data)) = start;
     for (0..get.len(data)) |index| {
         set(data, index, value);
         value += step;

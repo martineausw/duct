@@ -43,7 +43,7 @@ pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
         .is_int(.{}),
         .is_float(.{}),
     }),
-}))(@TypeOf(value))(T) {
+}))(&.{ T, @TypeOf(value) })(T) {
     return switch (@typeInfo(T)) {
         inline .int => switch (@typeInfo(@TypeOf(value))) {
             inline .int => @intCast(value),

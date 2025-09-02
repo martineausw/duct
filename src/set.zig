@@ -8,6 +8,8 @@ const ziggurat = @import("ziggurat");
 const prototype = @import("prototype.zig");
 const get = @import("get.zig");
 
+pub const iterate = @import("iterate/set.zig");
+
 pub inline fn set(
     data: anytype,
     index: usize,

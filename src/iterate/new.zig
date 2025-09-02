@@ -9,6 +9,8 @@ const prototype = @import("../prototype.zig");
 const get = @import("../get.zig");
 const set = @import("../set.zig");
 
+const ElementMath = @import("../element_math.zig").ElementMath;
+
 pub fn map(
     allocator: Allocator,
     data: anytype,
@@ -31,6 +33,126 @@ pub fn map(
     }
 
     return result;
+}
+
+pub fn mapWith(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+    func: *const fn (
+        elements: struct { meta.Elem(@TypeOf(a)), meta.Elem(@TypeOf(b)) },
+        index: usize,
+        data: struct { @TypeOf(a), @TypeOf(b) },
+    ) T,
+) ziggurat.sign(.seq(&.{
+    prototype.has_len,
+    prototype.has_len,
+}))(.{
+    @TypeOf(a),
+    @TypeOf(b),
+})(Allocator.Error![]T) {
+    const result = try allocator.alloc(T, get.len(a));
+
+    for (0..result.len) |index| {
+        result[index] = func(
+            .{ get.at(a, index), get.at(b, index) },
+            index,
+            .{ a, b },
+        );
+    }
+
+    return result;
+}
+
+pub fn add(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).add,
+    );
+}
+
+pub fn sub(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).sub,
+    );
+}
+
+pub fn mul(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).mul,
+    );
+}
+
+pub fn div(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).div,
+    );
+}
+
+pub fn divFloor(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).divFloor,
+    );
+}
+
+pub fn divCeil(
+    allocator: Allocator,
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) Allocator.Error![]T {
+    return mapWith(
+        allocator,
+        T,
+        a,
+        b,
+        ElementMath(T, @TypeOf(a), @TypeOf(b)).divCeil,
+    );
 }
 
 pub fn mapRight(

@@ -6,6 +6,8 @@ const ziggurat = @import("ziggurat");
 
 const prototype = @import("prototype.zig");
 
+pub const iterate = @import("iterate/get.zig");
+
 pub inline fn at(
     data: anytype,
     index: usize,
@@ -30,6 +32,55 @@ pub inline fn len(
         },
         else => unreachable,
     };
+}
+
+pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
+    .any(&.{
+        .is_int(.{}),
+        .is_float(.{}),
+    }),
+    .any(&.{
+        .is_int(.{}),
+        .is_float(.{}),
+    }),
+}))(@TypeOf(value))(T) {
+    return switch (@typeInfo(T)) {
+        inline .int => switch (@typeInfo(@TypeOf(value))) {
+            inline .int => @intCast(value),
+            inline .float => @intFromFloat(value),
+            else => unreachable,
+        },
+        inline .float => switch (@typeInfo(@TypeOf(value))) {
+            inline .int => @floatFromInt(value),
+            inline .float => @floatCast(value),
+            else => unreachable,
+        },
+        else => unreachable,
+    };
+}
+
+pub inline fn add(comptime T: type, a: anytype, b: anytype) T {
+    return numCast(T, a) + numCast(T, b);
+}
+
+pub inline fn sub(comptime T: type, a: anytype, b: anytype) T {
+    return numCast(T, a) - numCast(T, b);
+}
+
+pub inline fn mul(comptime T: type, a: anytype, b: anytype) T {
+    return numCast(T, a) * numCast(T, b);
+}
+
+pub inline fn div(comptime T: type, a: anytype, b: anytype) T {
+    return numCast(T, a) / numCast(T, b);
+}
+
+pub inline fn divFloor(comptime T: type, a: anytype, b: anytype) T {
+    return std.math.divFloor(T, numCast(T, a), numCast(T, b));
+}
+
+pub inline fn divCeil(comptime T: type, a: anytype, b: anytype) T {
+    return std.math.divCeil(T, numCast(T, a), numCast(T, b));
 }
 
 pub fn indexOf(

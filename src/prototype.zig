@@ -31,3 +31,8 @@ pub const has_len: ziggurat.Prototype = .any(&.{
 pub const is_slice: ziggurat.Prototype = .any(&.{
     .is_pointer(.{ .size = .{ .slice = true } }),
 });
+
+pub const is_number: ziggurat.Prototype = .any(&.{
+    .is_int(.{}),
+    .is_float(.{}),
+});

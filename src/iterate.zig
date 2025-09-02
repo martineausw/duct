@@ -10,6 +10,7 @@ const prototype = @import("prototype.zig");
 pub const get = @import("iterate/get.zig");
 pub const set = @import("iterate/set.zig");
 pub const new = @import("iterate/new.zig");
+pub const math = @import("iterate/math.zig");
 
 pub fn forEach(
     data: anytype,

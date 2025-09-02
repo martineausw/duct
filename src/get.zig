@@ -35,15 +35,12 @@ pub inline fn len(
 }
 
 pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
-    .any(&.{
-        .is_int(.{}),
-        .is_float(.{}),
-    }),
-    .any(&.{
-        .is_int(.{}),
-        .is_float(.{}),
-    }),
-}))(&.{ T, @TypeOf(value) })(T) {
+    prototype.is_number,
+    prototype.is_number,
+}))(&.{
+    T,
+    @TypeOf(value),
+})(T) {
     return switch (@typeInfo(T)) {
         inline .int => switch (@typeInfo(@TypeOf(value))) {
             inline .int => @intCast(value),
@@ -59,28 +56,52 @@ pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
     };
 }
 
-pub inline fn add(comptime T: type, a: anytype, b: anytype) T {
+pub inline fn add(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
     return numCast(T, a) + numCast(T, b);
 }
 
-pub inline fn sub(comptime T: type, a: anytype, b: anytype) T {
+pub inline fn sub(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
     return numCast(T, a) - numCast(T, b);
 }
 
-pub inline fn mul(comptime T: type, a: anytype, b: anytype) T {
+pub inline fn mul(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
     return numCast(T, a) * numCast(T, b);
 }
 
-pub inline fn div(comptime T: type, a: anytype, b: anytype) T {
+pub inline fn div(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
     return numCast(T, a) / numCast(T, b);
 }
 
-pub inline fn divFloor(comptime T: type, a: anytype, b: anytype) T {
-    return std.math.divFloor(T, numCast(T, a), numCast(T, b));
+pub inline fn divFloor(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
+    return std.math.divFloor(T, numCast(T, a), numCast(T, b)) catch unreachable;
 }
 
-pub inline fn divCeil(comptime T: type, a: anytype, b: anytype) T {
-    return std.math.divCeil(T, numCast(T, a), numCast(T, b));
+pub inline fn divCeil(
+    comptime T: type,
+    a: anytype,
+    b: anytype,
+) T {
+    return std.math.divCeil(T, numCast(T, a), numCast(T, b)) catch unreachable;
 }
 
 pub fn indexOf(

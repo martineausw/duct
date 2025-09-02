@@ -61,7 +61,7 @@ pub fn add(
     comptime T: type,
     dest: anytype,
     aux: anytype,
-) Allocator.Error![]T {
+) void {
     return mapWith(
         T,
         dest,
@@ -100,7 +100,7 @@ pub fn div(
     comptime T: type,
     dest: anytype,
     aux: anytype,
-) Allocator.Error![]T {
+) void {
     return mapWith(
         T,
         dest,
@@ -113,7 +113,7 @@ pub fn divFloor(
     comptime T: type,
     dest: anytype,
     aux: anytype,
-) Allocator.Error![]T {
+) void {
     return mapWith(
         T,
         dest,
@@ -126,7 +126,7 @@ pub fn divCeil(
     comptime T: type,
     dest: anytype,
     aux: anytype,
-) Allocator.Error![]T {
+) void {
     return mapWith(
         T,
         dest,

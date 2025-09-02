@@ -49,7 +49,7 @@ pub fn mapWith(
     @TypeOf(aux),
 })(void) {
     for (0..dest.len) |index| {
-        set.set(index, func(
+        set.set(dest.*, index, func(
             .{ get.at(dest.*, index), get.at(aux, index) },
             index,
             .{ dest.*, aux },

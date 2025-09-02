@@ -66,7 +66,7 @@ pub fn add(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).add,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).add,
     );
 }
 
@@ -79,7 +79,7 @@ pub fn sub(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).sub,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).sub,
     );
 }
 
@@ -92,7 +92,7 @@ pub fn mul(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).mul,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).mul,
     );
 }
 
@@ -105,7 +105,7 @@ pub fn div(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).div,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).div,
     );
 }
 
@@ -118,7 +118,7 @@ pub fn divFloor(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).divFloor,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).divFloor,
     );
 }
 
@@ -131,7 +131,7 @@ pub fn divCeil(
         T,
         dest,
         aux,
-        ElementMath(T, @TypeOf(dest), @TypeOf(aux)).divCeil,
+        ElementMath(T, @TypeOf(dest.*), @TypeOf(aux)).divCeil,
     );
 }
 

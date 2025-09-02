@@ -37,22 +37,22 @@ pub fn mapWith(
     dest: anytype,
     aux: anytype,
     func: *const fn (
-        elements: struct { meta.Elem(@TypeOf(dest)), meta.Elem(@TypeOf(aux)) },
+        elements: struct { meta.Elem(@TypeOf(dest.*)), meta.Elem(@TypeOf(aux)) },
         index: usize,
-        data: struct { @TypeOf(dest), @TypeOf(aux) },
+        data: struct { @TypeOf(dest.*), @TypeOf(aux) },
     ) T,
 ) ziggurat.sign(.seq(&.{
     prototype.has_len,
     prototype.has_len,
 }))(.{
-    @TypeOf(dest),
+    @TypeOf(dest.*),
     @TypeOf(aux),
 })(void) {
     for (0..dest.len) |index| {
         set.set(index, func(
-            .{ get.at(dest, index), get.at(aux, index) },
+            .{ get.at(dest.*, index), get.at(aux, index) },
             index,
-            .{ dest, aux },
+            .{ dest.*, aux },
         ));
     }
 }

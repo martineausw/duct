@@ -46,3 +46,30 @@ pub const are_numbers: ziggurat.Prototype = .any(&.{
     }),
     .is_pointer(.{ .child = is_number, .size = .{ .many = true }, .sentinel = true }),
 });
+
+pub const has_index_mutable: ziggurat.Prototype = .any(&.{
+    is_slice,
+    .is_pointer(.{
+        .child = has_index,
+        .size = .{ .one = true },
+        .is_const = false,
+    }),
+});
+
+pub const has_dynamic_len_mutable: ziggurat.Prototype = .any(&.{
+    is_slice,
+    .is_pointer(.{
+        .child = is_slice,
+        .size = .{ .one = true },
+        .is_const = false,
+    }),
+});
+
+pub const has_len_mutable: ziggurat.Prototype = .any(&.{
+    is_slice,
+    .is_pointer(.{
+        .child = has_len,
+        .size = .{ .one = true },
+        .is_const = false,
+    }),
+});

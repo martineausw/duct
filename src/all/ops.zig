@@ -9,7 +9,7 @@ const meta = @import("std").meta;
 const ziggurat = @import("ziggurat");
 const prototype = @import("../prototype.zig");
 
-pub fn Elm(
+pub fn elm_func(
     comptime T: type,
     comptime Data0: type,
     comptime Data1: type,
@@ -69,7 +69,7 @@ pub fn Elm(
     };
 }
 
-pub fn Scl(
+pub fn scl_func(
     comptime T: type,
     comptime Data: type,
 ) ziggurat.sign(.seq(&.{

@@ -7,6 +7,9 @@ const ziggurat = @import("ziggurat");
 
 const get = @import("get.zig");
 const prototype = @import("prototype.zig");
+const has_index_mutable = prototype.has_index_mutable;
+const has_len_mutable = prototype.has_len_mutable;
+const has_dynamic_len_mutable = prototype.has_dynamic_len_mutable;
 
 pub const all = @import("all/set.zig");
 
@@ -14,22 +17,18 @@ pub inline fn set(
     data: anytype,
     index: usize,
     value: meta.Elem(@TypeOf(data)),
-) ziggurat.sign(.all(&.{
-    prototype.has_index,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+) ziggurat.sign(
+    has_index_mutable,
+)(@TypeOf(data))(void) {
     data[index] = value;
 }
 
 pub fn fill(
     data: anytype,
     value: meta.Elem(@TypeOf(data)),
-) ziggurat.sign(.all(&.{
-    prototype.has_len,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+) ziggurat.sign(
+    has_len_mutable,
+)(@TypeOf(data))(void) {
     for (0..get.len(data)) |index| {
         set(data, index, value);
     }
@@ -37,21 +36,17 @@ pub fn fill(
 
 pub fn ones(
     data: anytype,
-) ziggurat.sign(.all(&.{
-    prototype.has_len,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+) ziggurat.sign(
+    has_len_mutable,
+)(@TypeOf(data))(void) {
     fill(data, 1);
 }
 
 pub fn zeroes(
     data: anytype,
-) ziggurat.sign(.all(&.{
-    prototype.has_len,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+) ziggurat.sign(
+    has_len_mutable,
+)(@TypeOf(data))(void) {
     fill(data, 0);
 }
 
@@ -59,11 +54,9 @@ pub fn transpose(
     allocator: Allocator,
     data: anytype,
     axes: []const usize,
-) ziggurat.sign(.any(&.{
-    prototype.has_len,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(Allocator.Error!void) {
+) ziggurat.sign(
+    has_index_mutable,
+)(@TypeOf(data))(Allocator.Error!void) {
     const result = try allocator.alloc(meta.Elem(@TypeOf(data)), get.len(data));
 
     for (0..get.len(data)) |index| {
@@ -80,16 +73,16 @@ pub fn transpose(
 pub fn arange(
     data: anytype,
     start: meta.Elem(@TypeOf(data)),
-    step: meta.Elem(@TypeOf(data)),
-) ziggurat.sign(.all(&.{
-    prototype.has_len,
-    .not(.is_array(.{})),
-    .not(.is_vector(.{})),
-}))(@TypeOf(data))(void) {
+    step: @TypeOf(start),
+    end: @TypeOf(step),
+) ziggurat.sign(
+    has_index_mutable,
+)(@TypeOf(data))(void) {
     var value: meta.Elem(@TypeOf(data)) = start;
-    for (0..get.len(data)) |index| {
+    var index: usize = 0;
+    while (value < end) : (value += step) {
         set(data, index, value);
-        value += step;
+        index += 1;
     }
 }
 
@@ -97,11 +90,9 @@ pub fn remove(
     allocator: Allocator,
     data: anytype,
     index: usize,
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
     const result = try allocator.alloc(meta.Elem(@TypeOf(data.*)), get.len(data.*) - 1);
     const return_value: meta.Elem(@TypeOf(data.*)) = get.at(data.*, index);
 
@@ -126,11 +117,9 @@ pub fn insert(
     data: anytype,
     index: usize,
     value: meta.Elem(@TypeOf(data.*)),
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!void) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!void) {
     const result = try allocator.alloc(meta.Elem(@TypeOf(data.*)), get.len(data.*) + 1);
 
     var data_index: usize = 0;
@@ -152,11 +141,9 @@ pub fn push(
     allocator: Allocator,
     data: anytype,
     value: meta.Elem(@TypeOf(data.*)),
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!void) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!void) {
     return insert(allocator, data, get.len(data.*), value);
 }
 
@@ -164,33 +151,27 @@ pub fn unshift(
     allocator: Allocator,
     data: anytype,
     value: meta.Elem(@TypeOf(data.*)),
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!void) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!void) {
     return insert(allocator, data, 0, value);
 }
 
 pub fn pop(
     allocator: Allocator,
     data: anytype,
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
     return remove(allocator, data, get.len(data.*) - 1);
 }
 
 pub fn shift(
     allocator: Allocator,
     data: anytype,
-) ziggurat.sign(.is_pointer(.{
-    .child = prototype.is_slice,
-    .size = .{ .one = true },
-    .is_const = false,
-}))(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
+) ziggurat.sign(
+    has_dynamic_len_mutable,
+)(@TypeOf(data))(Allocator.Error!meta.Elem(@TypeOf(data.*))) {
     return remove(allocator, data, 0);
 }
 

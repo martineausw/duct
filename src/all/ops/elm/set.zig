@@ -4,112 +4,97 @@ const testing = std.testing;
 
 const ziggurat = @import("ziggurat");
 
-const get = @import("../../../get.zig");
-const set = @import("../../../set.zig");
+const base_get = @import("../../../get.zig");
+const base_set = @import("../../../set.zig");
 const prototype = @import("../../../prototype.zig");
-const Element = @import("../../ops.zig").Elm;
+const elm_func = @import("../../ops.zig").elm_func;
 
-pub fn map(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-    func: *const fn (
-        elements: struct { meta.Elem(@TypeOf(dest.*)), meta.Elem(@TypeOf(aux)) },
-        index: usize,
-        data: struct { @TypeOf(dest.*), @TypeOf(aux) },
-    ) T,
-) ziggurat.sign(.seq(&.{
-    prototype.has_len,
-    prototype.has_len,
-}))(.{
-    @TypeOf(dest.*),
-    @TypeOf(aux),
-})(void) {
-    for (0..dest.len) |index| {
-        set.set(dest.*, index, func(
-            .{ get.at(dest.*, index), get.at(aux, index) },
-            index,
-            .{ dest.*, aux },
-        ));
-    }
-}
+pub fn set(comptime T: type) type {
+    return struct {
+        pub fn map(
+            dest: anytype,
+            aux: anytype,
+            func: *const fn (
+                elements: struct { T, T },
+                index: usize,
+                data: struct { @TypeOf(dest.*), @TypeOf(aux) },
+            ) T,
+        ) void {
+            for (0..dest.len) |index| {
+                base_set.set(dest.*, index, func(
+                    .{ base_get.at(dest.*, index), base_get.at(aux, index) },
+                    index,
+                    .{ dest.*, aux },
+                ));
+            }
+        }
 
-pub fn add(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).add,
-    );
-}
+        pub fn add(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).add,
+            );
+        }
 
-pub fn sub(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).sub,
-    );
-}
+        pub fn sub(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).sub,
+            );
+        }
 
-pub fn mul(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).mul,
-    );
-}
+        pub fn mul(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).mul,
+            );
+        }
 
-pub fn div(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).div,
-    );
-}
+        pub fn div(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).div,
+            );
+        }
 
-pub fn divFloor(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).divFloor,
-    );
-}
+        pub fn divFloor(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).divFloor,
+            );
+        }
 
-pub fn divCeil(
-    comptime T: type,
-    dest: anytype,
-    aux: anytype,
-) void {
-    return map(
-        T,
-        dest,
-        aux,
-        Element(T, @TypeOf(dest.*), @TypeOf(aux)).divCeil,
-    );
+        pub fn divCeil(
+            dest: anytype,
+            aux: anytype,
+        ) void {
+            return map(
+                dest,
+                aux,
+                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).divCeil,
+            );
+        }
+    };
 }
 
 test "add" {
@@ -120,7 +105,7 @@ test "add" {
     slice[1] = 2;
     slice[2] = 3;
 
-    add(usize, &slice, slice);
+    set(usize).add(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, slice);
 }
@@ -133,7 +118,7 @@ test "sub" {
     slice[1] = 2;
     slice[2] = 3;
 
-    sub(usize, &slice, slice);
+    set(usize).sub(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 0, 0, 0 }, slice);
 }
@@ -146,7 +131,7 @@ test "mul" {
     slice[1] = 2;
     slice[2] = 3;
 
-    mul(usize, &slice, slice);
+    set(usize).mul(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 1, 4, 9 }, slice);
 }
@@ -159,7 +144,7 @@ test "div" {
     slice[1] = 2;
     slice[2] = 3;
 
-    div(usize, &slice, slice);
+    set(usize).div(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
 }
@@ -172,7 +157,7 @@ test "divFloor" {
     slice[1] = 2;
     slice[2] = 3;
 
-    divFloor(usize, &slice, slice);
+    set(usize).divFloor(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
 }
@@ -185,7 +170,7 @@ test "divCeil" {
     slice[1] = 2;
     slice[2] = 3;
 
-    divCeil(usize, &slice, slice);
+    set(usize).divCeil(&slice, slice);
 
     try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
 }

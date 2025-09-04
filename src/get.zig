@@ -35,22 +35,29 @@ pub inline fn len(
 }
 
 pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
-    prototype.is_number,
-    prototype.is_number,
+    .any(&.{ .is_int(.{}), .is_float(.{}), .is_bool }),
+    .any(&.{ .is_int(.{}), .is_float(.{}), .is_bool }),
 }))(&.{
     T,
     @TypeOf(value),
 })(T) {
     return switch (@typeInfo(T)) {
-        inline .int => switch (@typeInfo(@TypeOf(value))) {
-            inline .int => @intCast(value),
-            inline .float => @intFromFloat(value),
+        .int => switch (@typeInfo(@TypeOf(value))) {
+            .int => @intCast(value),
+            .float => @intFromFloat(value),
+            .bool => if (value) 1 else 0,
             else => unreachable,
         },
-        inline .float => switch (@typeInfo(@TypeOf(value))) {
-            inline .int => @floatFromInt(value),
-            inline .float => @floatCast(value),
+        .float => switch (@typeInfo(@TypeOf(value))) {
+            .int => @floatFromInt(value),
+            .float => @floatCast(value),
+            .bool => if (value) 1 else 0,
             else => unreachable,
+        },
+        .bool => switch (@typeInfo(@TypeOf(value))) {
+            .int => value != 0,
+            .float => std.math.approxEqAbs(@TypeOf(value), value, 0, std.math.floatEps(@TypeOf(value))),
+            .bool => value,
         },
         else => unreachable,
     };

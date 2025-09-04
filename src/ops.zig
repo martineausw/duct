@@ -3,49 +3,49 @@ const std = @import("std");
 const get = @import("get.zig");
 
 pub inline fn add(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return get.numCast(T, a) + get.numCast(T, b);
+) Result {
+    return get.numCast(Result, a) + get.numCast(Result, b);
 }
 
 pub inline fn sub(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return get.numCast(T, a) - get.numCast(T, b);
+) Result {
+    return get.numCast(Result, a) - get.numCast(Result, b);
 }
 
 pub inline fn mul(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return get.numCast(T, a) * get.numCast(T, b);
+) Result {
+    return get.numCast(Result, a) * get.numCast(Result, b);
 }
 
 pub inline fn div(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return get.numCast(T, a) / get.numCast(T, b);
+) Result {
+    return get.numCast(Result, a) / get.numCast(Result, b);
 }
 
 pub inline fn divFloor(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return std.math.divFloor(T, get.numCast(T, a), get.numCast(T, b)) catch unreachable;
+) Result {
+    return std.math.divFloor(Result, get.numCast(Result, a), get.numCast(Result, b)) catch unreachable;
 }
 
 pub inline fn divCeil(
-    comptime T: type,
+    comptime Result: type,
     a: anytype,
     b: anytype,
-) T {
-    return std.math.divCeil(T, get.numCast(T, a), get.numCast(T, b)) catch unreachable;
+) Result {
+    return std.math.divCeil(Result, get.numCast(Result, a), get.numCast(Result, b)) catch unreachable;
 }

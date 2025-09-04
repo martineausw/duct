@@ -13,25 +13,26 @@ pub const all = @import("all/new.zig");
 
 pub fn fill(
     allocator: Allocator,
-    comptime T: type,
     n: usize,
-    value: T,
+    value: anytype,
 ) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
-}))(T)(Allocator.Error![]T) {
-    const result = try allocator.alloc(T, n);
+    .is_bool,
+}))(@TypeOf(value))(Allocator.Error![]@TypeOf(value)) {
+    const result = try allocator.alloc(@TypeOf(value), n);
     set.fill(result, value);
     return result;
 }
 
 pub fn zeroes(
     allocator: Allocator,
-    comptime T: type,
+    T: type,
     n: usize,
 ) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
+    .is_bool,
 }))(T)(Allocator.Error![]T) {
     const result = try allocator.alloc(T, n);
     set.zeroes(result);
@@ -40,11 +41,12 @@ pub fn zeroes(
 
 pub fn ones(
     allocator: Allocator,
-    comptime T: type,
+    T: type,
     n: usize,
 ) ziggurat.sign(.any(&.{
     .is_int(.{}),
     .is_float(.{}),
+    .is_bool,
 }))(T)(Allocator.Error![]T) {
     const result = try allocator.alloc(T, n);
     set.ones(result);
@@ -53,14 +55,16 @@ pub fn ones(
 
 pub fn arange(
     allocator: Allocator,
-    comptime T: type,
     n: usize,
-    start: T,
-    step: T,
+    start: anytype,
+    step: @TypeOf(start),
 ) ziggurat.sign(
-    .any(&.{ .is_float(.{}), .is_int(.{}) }),
-)(T)(Allocator.Error![]T) {
-    const result = try allocator.alloc(T, n);
+    .any(&.{
+        .is_float(.{}),
+        .is_int(.{}),
+    }),
+)(@TypeOf(start))(Allocator.Error![]@TypeOf(start)) {
+    const result = try allocator.alloc(@TypeOf(start), n);
     set.arange(result, start, step);
     return result;
 }

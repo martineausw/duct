@@ -4,10 +4,10 @@ pub const scl = @import("ops/scl.zig");
 test {
     @import("std").testing.refAllDecls(@This());
 }
-const ops = @import("../../ops.zig");
+const ops = @import("../ops.zig");
 const meta = @import("std").meta;
 const ziggurat = @import("ziggurat");
-const prototype = @import("../../prototype.zig");
+const prototype = @import("../prototype.zig");
 
 pub fn Elm(
     comptime T: type,

@@ -7,7 +7,7 @@ const ziggurat = @import("ziggurat");
 const get = @import("../../../get.zig");
 const set = @import("../../../set.zig");
 const prototype = @import("../../../prototype.zig");
-const Scalar = @import("../scl.zig").Scalar;
+const Scalar = @import("../../ops.zig").Scl;
 
 pub fn map(
     comptime T: type,

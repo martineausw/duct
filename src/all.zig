@@ -7,10 +7,10 @@ const ziggurat = @import("ziggurat");
 const element_get = @import("get.zig");
 const prototype = @import("prototype.zig");
 
-pub const get = @import("iterate/get.zig");
-pub const set = @import("iterate/set.zig");
-pub const new = @import("iterate/new.zig");
-pub const math = @import("iterate/math.zig");
+pub const get = @import("all/get.zig");
+pub const set = @import("all/set.zig");
+pub const new = @import("all/new.zig");
+pub const ops = @import("all/ops.zig");
 
 pub fn forEach(
     data: anytype,

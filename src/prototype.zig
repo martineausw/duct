@@ -36,3 +36,13 @@ pub const is_number: ziggurat.Prototype = .any(&.{
     .is_int(.{}),
     .is_float(.{}),
 });
+
+pub const are_numbers: ziggurat.Prototype = .any(&.{
+    .is_array(.{ .child = is_number }),
+    .is_vector(.{ .child = is_number }),
+    .is_pointer(.{
+        .child = is_number,
+        .size = .{ .slice = true },
+    }),
+    .is_pointer(.{ .child = is_number, .size = .{ .many = true }, .sentinel = true }),
+});

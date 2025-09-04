@@ -5,10 +5,10 @@ const Allocator = std.mem.Allocator;
 
 const ziggurat = @import("ziggurat");
 
-const prototype = @import("prototype.zig");
 const get = @import("get.zig");
+const prototype = @import("prototype.zig");
 
-pub const iterate = @import("iterate/set.zig");
+pub const all = @import("all/set.zig");
 
 pub inline fn set(
     data: anytype,

@@ -9,7 +9,7 @@ const prototype = @import("prototype.zig");
 const get = @import("get.zig");
 const set = @import("set.zig");
 
-pub const iterate = @import("iterate/new.zig");
+pub const all = @import("all/new.zig");
 
 pub fn fill(
     allocator: Allocator,

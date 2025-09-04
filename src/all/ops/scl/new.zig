@@ -7,32 +7,30 @@ const ziggurat = @import("ziggurat");
 
 const get = @import("../../../get.zig");
 const prototype = @import("../../../prototype.zig");
-const Element = @import("../../../math.zig").Element;
+const Scalar = @import("../scl.zig").Scalar;
 
 pub fn map(
     allocator: Allocator,
     comptime T: type,
-    data_0: anytype,
-    data_1: anytype,
+    data: anytype,
+    scalar: T,
     func: *const fn (
-        elements: struct { meta.Elem(@TypeOf(data_0)), meta.Elem(@TypeOf(data_1)) },
+        scalar: T,
+        element: meta.Elem(@TypeOf(data)),
         index: usize,
-        data: struct { @TypeOf(data_0), @TypeOf(data_1) },
-    ) T,
-) ziggurat.sign(.seq(&.{
+        data: @TypeOf(data),
+    ) meta.Elem(@TypeOf(data)),
+) ziggurat.sign(
     prototype.has_len,
-    prototype.has_len,
-}))(.{
-    @TypeOf(data_0),
-    @TypeOf(data_1),
-})(Allocator.Error![]T) {
-    const result = try allocator.alloc(T, get.len(data_0));
+)(@TypeOf(data))(Allocator.Error![]meta.Elem(@TypeOf(data))) {
+    const result = try allocator.alloc(T, get.len(data));
 
     for (0..result.len) |index| {
         result[index] = func(
-            .{ get.at(data_0, index), get.at(data_1, index) },
+            scalar,
+            get.at(data, index),
             index,
-            .{ data_0, data_1 },
+            data,
         );
     }
 
@@ -42,90 +40,90 @@ pub fn map(
 pub fn add(
     allocator: Allocator,
     comptime T: type,
-    data_0: anytype,
-    data_1: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        data_0,
-        data_1,
-        Element(T, @TypeOf(data_0), @TypeOf(data_1)).add,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).add,
     );
 }
 
 pub fn sub(
     allocator: Allocator,
     comptime T: type,
-    data_0: anytype,
-    data_1: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        data_0,
-        data_1,
-        Element(T, @TypeOf(data_0), @TypeOf(data_1)).sub,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).sub,
     );
 }
 
 pub fn mul(
     allocator: Allocator,
     comptime T: type,
-    data_0: anytype,
-    data_1: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        data_0,
-        data_1,
-        Element(T, @TypeOf(data_0), @TypeOf(data_1)).mul,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).mul,
     );
 }
 
 pub fn div(
     allocator: Allocator,
     comptime T: type,
-    a: anytype,
-    b: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        a,
-        b,
-        Element(T, @TypeOf(a), @TypeOf(b)).div,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).div,
     );
 }
 
 pub fn divFloor(
     allocator: Allocator,
     comptime T: type,
-    a: anytype,
-    b: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        a,
-        b,
-        Element(T, @TypeOf(a), @TypeOf(b)).divFloor,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).divFloor,
     );
 }
 
 pub fn divCeil(
     allocator: Allocator,
     comptime T: type,
-    a: anytype,
-    b: anytype,
+    data: anytype,
+    scalar: T,
 ) Allocator.Error![]T {
     return map(
         allocator,
         T,
-        a,
-        b,
-        Element(T, @TypeOf(a), @TypeOf(b)).divCeil,
+        data,
+        scalar,
+        Scalar(T, @TypeOf(data)).divCeil,
     );
 }
 
@@ -137,10 +135,10 @@ test "add" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try add(testing.allocator, usize, slice, slice);
+    const result = try add(testing.allocator, usize, slice, 1);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, result);
+    try testing.expectEqualSlices(usize, &.{ 2, 3, 4 }, result);
 }
 
 test "sub" {
@@ -151,10 +149,10 @@ test "sub" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try sub(testing.allocator, usize, slice, slice);
+    const result = try sub(testing.allocator, usize, slice, 1);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 0, 0, 0 }, result);
+    try testing.expectEqualSlices(usize, &.{ 0, 1, 2 }, result);
 }
 
 test "mul" {
@@ -165,10 +163,10 @@ test "mul" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try mul(testing.allocator, usize, slice, slice);
+    const result = try mul(testing.allocator, usize, slice, 2);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 1, 4, 9 }, result);
+    try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, result);
 }
 
 test "div" {
@@ -179,10 +177,10 @@ test "div" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try div(testing.allocator, usize, slice, slice);
+    const result = try div(testing.allocator, usize, slice, 1);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
+    try testing.expectEqualSlices(usize, &.{ 1, 2, 3 }, result);
 }
 
 test "divFloor" {
@@ -193,10 +191,10 @@ test "divFloor" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try divFloor(testing.allocator, usize, slice, slice);
+    const result = try divFloor(testing.allocator, usize, slice, 2);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
+    try testing.expectEqualSlices(usize, &.{ 0, 1, 1 }, result);
 }
 
 test "divCeil" {
@@ -207,8 +205,8 @@ test "divCeil" {
     slice[1] = 2;
     slice[2] = 3;
 
-    const result = try divCeil(testing.allocator, usize, slice, slice);
+    const result = try divCeil(testing.allocator, usize, slice, 2);
     defer testing.allocator.free(result);
 
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
+    try testing.expectEqualSlices(usize, &.{ 1, 1, 2 }, result);
 }

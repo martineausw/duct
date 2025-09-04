@@ -9,9 +9,6 @@ const prototype = @import("../prototype.zig");
 const get = @import("../get.zig");
 const set = @import("../set.zig");
 
-const Element = @import("../math.zig").Element;
-const Scalar = @import("../math.zig").Scalar;
-
 pub fn map(
     allocator: Allocator,
     data: anytype,

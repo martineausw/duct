@@ -6,7 +6,7 @@ const ziggurat = @import("ziggurat");
 
 const prototype = @import("prototype.zig");
 
-pub const iterate = @import("iterate/get.zig");
+pub const all = @import("all/get.zig");
 
 pub inline fn at(
     data: anytype,
@@ -54,54 +54,6 @@ pub inline fn numCast(comptime T: type, value: anytype) ziggurat.sign(.seq(&.{
         },
         else => unreachable,
     };
-}
-
-pub inline fn add(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return numCast(T, a) + numCast(T, b);
-}
-
-pub inline fn sub(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return numCast(T, a) - numCast(T, b);
-}
-
-pub inline fn mul(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return numCast(T, a) * numCast(T, b);
-}
-
-pub inline fn div(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return numCast(T, a) / numCast(T, b);
-}
-
-pub inline fn divFloor(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return std.math.divFloor(T, numCast(T, a), numCast(T, b)) catch unreachable;
-}
-
-pub inline fn divCeil(
-    comptime T: type,
-    a: anytype,
-    b: anytype,
-) T {
-    return std.math.divCeil(T, numCast(T, a), numCast(T, b)) catch unreachable;
 }
 
 pub fn indexOf(

@@ -36,6 +36,10 @@
             .url = "git+https://github.com/martineausw/ziggurat.git?ref=HEAD#80adbfc808368f0949e48d8adeba48500a4f10dc",
             .hash = "ziggurat-0.0.0-rsRs6V24AQBJjrWuET8ga7PkUe17BrN-DCXQ9_UU979K",
         },
+        .zither = .{
+            .url = "git+https://github.com/martineausw/zither.git?ref=HEAD#65b8c82ff08dd5d257905cec4828820147f20eea",
+            .hash = "zither-0.0.0-8UaokxURAQDR0uAhDNIHm5oTF1_iSX63hILDA9uFS7Cs",
+        },
     },
     .paths = .{
         "build.zig",

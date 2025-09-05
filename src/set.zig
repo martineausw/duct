@@ -14,13 +14,13 @@ const has_dynamic_len_mutable = prototype.has_dynamic_len_mutable;
 pub const all = @import("all/set.zig");
 
 pub inline fn set(
-    data: anytype,
+    dest: anytype,
     index: usize,
-    value: meta.Elem(@TypeOf(data)),
+    value: meta.Elem(@TypeOf(dest)),
 ) ziggurat.sign(
     has_index_mutable,
-)(@TypeOf(data))(void) {
-    data[index] = value;
+)(@TypeOf(dest))(void) {
+    dest[index] = value;
 }
 
 pub fn fill(

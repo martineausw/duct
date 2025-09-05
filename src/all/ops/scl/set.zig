@@ -12,88 +12,101 @@ const scl_func = @import("../../ops.zig").scl_func;
 pub fn set(comptime T: type) type {
     return struct {
         pub fn map(
+            dest: anytype,
             data: anytype,
-            scalar: T,
+            scalar: anytype,
             func: *const fn (
-                scalar: T,
-                element: T,
+                scalar: @TypeOf(scalar),
+                element: meta.Elem(@TypeOf(data)),
                 index: usize,
-                data: @TypeOf(data.*),
-            ) @TypeOf(scalar),
+                data: *const @TypeOf(data),
+            ) T,
         ) void {
             for (0..data.len) |index| {
-                base_set.set(data.*, index, func(
+                base_set.set(dest, index, func(
                     scalar,
-                    base_get.at(data.*, index),
+                    base_get.at(data, index),
                     index,
-                    data.*,
+                    &data,
                 ));
             }
         }
 
         pub fn add(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).add,
+                scl_func(T, @TypeOf(data)).add,
             );
         }
 
         pub fn sub(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).sub,
+                scl_func(T, @TypeOf(data)).sub,
             );
         }
 
         pub fn mul(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).mul,
+                scl_func(T, @TypeOf(data)).mul,
             );
         }
 
         pub fn div(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).div,
+                scl_func(T, @TypeOf(data)).div,
             );
         }
 
         pub fn divFloor(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).divFloor,
+                scl_func(T, @TypeOf(data)).divFloor,
             );
         }
 
         pub fn divCeil(
+            dest: anytype,
             data: anytype,
             scalar: anytype,
         ) void {
             return map(
+                dest,
                 data,
                 scalar,
-                scl_func(T, @TypeOf(data.*)).divCeil,
+                scl_func(T, @TypeOf(data)).divCeil,
             );
         }
     };
@@ -107,7 +120,7 @@ test "add" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).add(&slice, 2);
+    set(usize).add(slice, slice, @as(usize, 2));
 
     try testing.expectEqualSlices(usize, &.{ 3, 4, 5 }, slice);
 }
@@ -120,7 +133,7 @@ test "sub" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).sub(&slice, @as(usize, 1));
+    set(usize).sub(slice, slice, @as(usize, 1));
 
     try testing.expectEqualSlices(usize, &.{ 0, 1, 2 }, slice);
 }
@@ -133,7 +146,7 @@ test "mul" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).mul(&slice, @as(usize, 2));
+    set(usize).mul(slice, slice, @as(usize, 2));
 
     try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, slice);
 }
@@ -146,7 +159,7 @@ test "div" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).div(&slice, @as(usize, 1));
+    set(usize).div(slice, slice, @as(usize, 1));
 
     try testing.expectEqualSlices(usize, &.{ 1, 2, 3 }, slice);
 }
@@ -159,7 +172,7 @@ test "divFloor" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).divFloor(&slice, @as(usize, 2));
+    set(usize).divFloor(slice, slice, @as(usize, 2));
 
     try testing.expectEqualSlices(usize, &.{ 0, 1, 1 }, slice);
 }
@@ -172,7 +185,7 @@ test "divCeil" {
     slice[1] = 2;
     slice[2] = 3;
 
-    set(usize).divCeil(&slice, @as(usize, 2));
+    set(usize).divCeil(slice, slice, @as(usize, 2));
 
     try testing.expectEqualSlices(usize, &.{ 1, 1, 2 }, slice);
 }

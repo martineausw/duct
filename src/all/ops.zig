@@ -22,7 +22,7 @@ pub fn elm_func(
         pub fn add(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.add(T, elements.@"0", elements.@"1");
         }
@@ -30,7 +30,7 @@ pub fn elm_func(
         pub fn sub(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.sub(T, elements.@"0", elements.@"1");
         }
@@ -38,7 +38,7 @@ pub fn elm_func(
         pub fn mul(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.mul(T, elements.@"0", elements.@"1");
         }
@@ -46,7 +46,7 @@ pub fn elm_func(
         pub fn div(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.div(T, elements.@"0", elements.@"1");
         }
@@ -54,7 +54,7 @@ pub fn elm_func(
         pub fn divFloor(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.divFloor(T, elements.@"0", elements.@"1");
         }
@@ -62,7 +62,7 @@ pub fn elm_func(
         pub fn divCeil(
             elements: struct { meta.Elem(Data0), meta.Elem(Data1) },
             _: usize,
-            _: struct { Data0, Data1 },
+            _: struct { *const Data0, *const Data1 },
         ) T {
             return ops.divCeil(T, elements.@"0", elements.@"1");
         }
@@ -81,7 +81,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.add(T, element, scalar);
         }
@@ -90,7 +90,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.sub(T, element, scalar);
         }
@@ -99,7 +99,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.mul(T, element, scalar);
         }
@@ -108,7 +108,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.div(T, element, scalar);
         }
@@ -117,7 +117,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.divFloor(T, element, scalar);
         }
@@ -126,7 +126,7 @@ pub fn scl_func(
             scalar: T,
             element: meta.Elem(Data),
             _: usize,
-            _: Data,
+            _: *const Data,
         ) T {
             return ops.divCeil(T, element, scalar);
         }

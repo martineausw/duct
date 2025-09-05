@@ -13,21 +13,21 @@ pub fn new(comptime T: type) type {
     return struct {
         pub fn map(
             allocator: Allocator,
-            data_0: anytype,
-            data_1: anytype,
+            a: anytype,
+            b: anytype,
             func: *const fn (
-                elements: struct { T, T },
+                elements: struct { meta.Elem(@TypeOf(a)), meta.Elem(@TypeOf(b)) },
                 index: usize,
-                data: struct { @TypeOf(data_0), @TypeOf(data_1) },
+                data: struct { *const @TypeOf(a), *const @TypeOf(b) },
             ) T,
         ) Allocator.Error![]T {
-            const result = try allocator.alloc(T, get.len(data_0));
+            const result = try allocator.alloc(T, get.len(a));
 
             for (0..result.len) |index| {
                 result[index] = func(
-                    .{ get.at(data_0, index), get.at(data_1, index) },
+                    .{ get.at(a, index), get.at(b, index) },
                     index,
-                    .{ data_0, data_1 },
+                    .{ &a, &b },
                 );
             }
 
@@ -114,86 +114,90 @@ pub fn new(comptime T: type) type {
     };
 }
 
-test "add" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+test "map slices" {
+    const allocator = testing.allocator;
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    const a = try allocator.alloc(f32, 6);
+    const b = try allocator.alloc(f32, 6);
 
-    const result = try new(usize).add(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
+    for (0..a.len) |i| a[i] = @floatFromInt(i + 1);
+    for (0..b.len) |i| b[i] = @floatFromInt(i + 1);
 
-    try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, result);
+    const result = try new(f32).map(
+        allocator,
+        a,
+        b,
+        elm_func(f32, []const f32, []const f32).add,
+    );
+
+    allocator.free(a);
+    allocator.free(b);
+
+    try testing.expectEqualSlices(f32, &.{ 2, 4, 6, 8, 10, 12 }, result);
+
+    allocator.free(result);
 }
 
-test "sub" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+test "map slice and array" {
+    const allocator = testing.allocator;
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    const a = try allocator.alloc(f32, 6);
+    const b = [_]f32{ 1, 2, 3, 4, 5, 6 };
 
-    const result = try new(usize).sub(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
+    for (0..a.len) |i| a[i] = @floatFromInt(i + 1);
 
-    try testing.expectEqualSlices(usize, &.{ 0, 0, 0 }, result);
+    const result = try new(f32).map(
+        allocator,
+        a,
+        b,
+        elm_func(f32, []const f32, [6]f32).add,
+    );
+
+    allocator.free(a);
+
+    try testing.expectEqualSlices(f32, &.{ 2, 4, 6, 8, 10, 12 }, result);
+
+    allocator.free(result);
 }
 
-test "mul" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+test "map arrays" {
+    const allocator = testing.allocator;
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    const a = [_]f32{ 1, 2, 3, 4, 5, 6 };
+    const b = [_]f32{ 1, 2, 3, 4, 5, 6 };
 
-    const result = try new(usize).mul(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
+    const result = try new(f32).map(
+        allocator,
+        a,
+        b,
+        elm_func(f32, [6]f32, [6]f32).add,
+    );
 
-    try testing.expectEqualSlices(usize, &.{ 1, 4, 9 }, result);
+    try testing.expectEqualSlices(f32, &.{ 2, 4, 6, 8, 10, 12 }, result);
+
+    allocator.free(result);
 }
 
-test "div" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+test "map ints and floats" {
+    const allocator = testing.allocator;
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    const a = try allocator.alloc(i32, 6);
+    const b = try allocator.alloc(f32, 6);
 
-    const result = try new(usize).div(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
+    for (0..a.len) |i| a[i] = -1 * @as(i32, @intCast(i + 1));
+    for (0..b.len) |i| b[i] = @floatFromInt(i + 1);
 
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
-}
+    const result = try new(f32).map(
+        allocator,
+        a,
+        b,
+        elm_func(f32, []const i32, []const f32).add,
+    );
 
-test "divFloor" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+    allocator.free(a);
+    allocator.free(b);
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    try testing.expectEqualSlices(f32, &.{ 0, 0, 0, 0, 0, 0 }, result);
 
-    const result = try new(usize).divFloor(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
-}
-
-test "divCeil" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
-
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
-
-    const result = try new(usize).divCeil(testing.allocator, slice, slice);
-    defer testing.allocator.free(result);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, result);
+    allocator.free(result);
 }

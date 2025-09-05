@@ -14,14 +14,14 @@ pub fn new(comptime T: type) type {
         pub fn map(
             allocator: Allocator,
             data: anytype,
-            scalar: T,
+            scalar: anytype,
             func: *const fn (
-                scalar: T,
+                scalar: @TypeOf(scalar),
                 element: meta.Elem(@TypeOf(data)),
                 index: usize,
-                data: @TypeOf(data),
-            ) meta.Elem(@TypeOf(data)),
-        ) Allocator.Error![]meta.Elem(@TypeOf(data)) {
+                data: *const @TypeOf(data),
+            ) T,
+        ) Allocator.Error![]T {
             const result = try allocator.alloc(T, get.len(data));
 
             for (0..result.len) |index| {
@@ -29,7 +29,7 @@ pub fn new(comptime T: type) type {
                     scalar,
                     get.at(data, index),
                     index,
-                    data,
+                    &data,
                 );
             }
 

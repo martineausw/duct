@@ -11,13 +11,17 @@ pub const all = @import("all/get.zig");
 pub inline fn at(
     data: anytype,
     index: usize,
-) ziggurat.sign(prototype.has_index)(@TypeOf(data))(meta.Elem(@TypeOf(data))) {
+) ziggurat.sign(
+    prototype.has_index,
+)(@TypeOf(data))(meta.Elem(@TypeOf(data))) {
     return data[index];
 }
 
 pub inline fn len(
     data: anytype,
-) ziggurat.sign(prototype.has_len)(@TypeOf(data))(usize) {
+) ziggurat.sign(
+    prototype.has_len,
+)(@TypeOf(data))(usize) {
     return switch (@typeInfo(@TypeOf(data))) {
         inline .array => data.len,
         inline .vector => |info| info.len,

@@ -13,164 +13,125 @@ pub fn set(comptime T: type) type {
     return struct {
         pub fn map(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
             func: *const fn (
-                elements: struct { T, T },
+                elements: struct { meta.Elem(@TypeOf(a)), meta.Elem(@TypeOf(b)) },
                 index: usize,
-                data: struct { @TypeOf(dest.*), @TypeOf(aux) },
+                data: struct { *const @TypeOf(a), *const @TypeOf(b) },
             ) T,
         ) void {
             for (0..dest.len) |index| {
                 base_set.set(dest.*, index, func(
-                    .{ base_get.at(dest.*, index), base_get.at(aux, index) },
+                    .{ base_get.at(a, index), base_get.at(b, index) },
                     index,
-                    .{ dest.*, aux },
+                    .{ &a, &b },
                 ));
             }
         }
 
         pub fn add(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).add,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).add,
             );
         }
 
         pub fn sub(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).sub,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).sub,
             );
         }
 
         pub fn mul(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).mul,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).mul,
             );
         }
 
         pub fn div(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).div,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).div,
             );
         }
 
         pub fn divFloor(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).divFloor,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).divFloor,
             );
         }
 
         pub fn divCeil(
             dest: anytype,
-            aux: anytype,
+            a: anytype,
+            b: anytype,
         ) void {
             return map(
                 dest,
-                aux,
-                elm_func(T, @TypeOf(dest.*), @TypeOf(aux)).divCeil,
+                a,
+                b,
+                elm_func(T, @TypeOf(a), @TypeOf(b)).divCeil,
             );
         }
     };
 }
 
-test "add" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+test "map slices" {
+    const allocator = testing.allocator;
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    const a = try allocator.alloc(f32, 6);
+    const b = try allocator.alloc(f32, 6);
 
-    set(usize).add(&slice, slice);
+    for (0..a.len) |i| a[i] = @floatFromInt(i + 1);
+    for (0..b.len) |i| b[i] = @floatFromInt(i + 1);
 
-    try testing.expectEqualSlices(usize, &.{ 2, 4, 6 }, slice);
-}
+    const result = try allocator.alloc(f32, 6);
 
-test "sub" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
+    set(f32).map(
+        &result,
+        a,
+        b,
+        elm_func(f32, []const f32, []const f32).add,
+    );
 
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
+    allocator.free(a);
+    allocator.free(b);
 
-    set(usize).sub(&slice, slice);
+    try testing.expectEqualSlices(f32, &.{ 2, 4, 6, 8, 10, 12 }, result);
 
-    try testing.expectEqualSlices(usize, &.{ 0, 0, 0 }, slice);
-}
-
-test "mul" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
-
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
-
-    set(usize).mul(&slice, slice);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 4, 9 }, slice);
-}
-
-test "div" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
-
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
-
-    set(usize).div(&slice, slice);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
-}
-
-test "divFloor" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
-
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
-
-    set(usize).divFloor(&slice, slice);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
-}
-
-test "divCeil" {
-    const slice = try testing.allocator.alloc(usize, 3);
-    defer testing.allocator.free(slice);
-
-    slice[0] = 1;
-    slice[1] = 2;
-    slice[2] = 3;
-
-    set(usize).divCeil(&slice, slice);
-
-    try testing.expectEqualSlices(usize, &.{ 1, 1, 1 }, slice);
+    allocator.free(result);
 }

@@ -65,7 +65,7 @@ pub fn arange(
     }),
 )(@TypeOf(start))(Allocator.Error![]@TypeOf(start)) {
     const result = try allocator.alloc(@TypeOf(start), n);
-    set.arange(result, start, step, start + step * n);
+    set.arange(result, start, step, start + step * get.numCast(@TypeOf(step), n));
     return result;
 }
 
